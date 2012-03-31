@@ -16,23 +16,15 @@ In your C<<< dist.ini >>>:
    hash_tags = #foo
    url_shortener = TinyURL
 
-In your C<<< .netrc >>>:
-
-    machine api.twitter.com
-      login YOUR_TWITTER_USER_NAME
-      password YOUR_TWITTER_PASSWORD
-
 =head1 DESCRIPTION
 
-This plugin will use L<Net::Twitter> with the login and password in your
-C<<< .netrc >>> file to send a release notice to Twitter.  By default, it will include
-a link to your README file as extracted on a fast CPAN mirror.  This works
-very nicely with L<Dist::Zilla::Plugin::ReadmeFromPod>.
+This plugin will use L<Net::Twitter> to send a release notice to Twitter.
+By default, it will include a link to release on L<http://metacpan.org>.
 
 The default configuration is as follows:
 
    [Twitter]
-   tweet_url = http://cpan.cpantesters.org/authors/id/{{$AUTHOR_PATH}}/{{$DIST}}-{{$VERSION}}{{$TRIAL}}.readme
+   tweet_url = https://metacpan.org/release/{{$AUTHOR_UC}}/{{$DIST}}-{{$VERSION}}/
    tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}}
    url_shortener = TinyURL
 
@@ -42,6 +34,7 @@ appended to the C<<< tweet >>> message.  The following variables are
 available for substitution in the URL and message templates:
 
        DIST        # Foo-Bar
+       MODULE      # Foo::Bar
        ABSTRACT    # Foo-Bar is a module that FooBars
        VERSION     # 1.23
        TRIAL       # -TRIAL if is_trial, empty string otherwise.
@@ -62,7 +55,7 @@ really) to the end of the message generated from C<<< tweet >>>.
 
 =for Pod::Coverage after_release
 
-=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 
 =head1 SUPPORT
 
@@ -77,9 +70,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/dist-zilla-plugin-twitter>
+L<https://github.com/doherty/Dist-Zilla-Plugin-Twitter>
 
-  git clone https://github.com/dagolden/dist-zilla-plugin-twitter.git
+  git clone https://github.com/doherty/Dist-Zilla-Plugin-Twitter.git
 
 =head1 AUTHOR
 
