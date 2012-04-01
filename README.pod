@@ -74,9 +74,19 @@ L<https://github.com/doherty/Dist-Zilla-Plugin-Twitter>
 
   git clone https://github.com/doherty/Dist-Zilla-Plugin-Twitter.git
 
-=head1 AUTHOR
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 David Golden <dagolden@cpan.org>
+
+=item *
+
+Mike Doherty <doherty@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
