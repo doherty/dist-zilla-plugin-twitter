@@ -46,12 +46,11 @@ has 'config_file' => (
     is => 'ro',
     isa => 'Str',
     default => sub {
-        require File::HomeDir;
         require File::Spec;
+        require Dist::Zilla::Util;
 
         return File::Spec->catfile(
-            File::HomeDir->my_home,
-            '.dzil',
+            Dist::Zilla::Util->_global_config_root(),
             'twitter.ini'
         );
     }
