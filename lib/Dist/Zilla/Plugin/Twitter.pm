@@ -93,7 +93,7 @@ has 'twitter' => (
             my $auth_url = $nt->get_authorization_url;
             $self->log(__PACKAGE__ . " isn't authorized to tweet on your behalf yet");
             $self->log("Go to $auth_url to authorize this application");
-            my $pin = $self->zilla->chrome->prompt_str('Enter the PIN: ', { noecho => 1 });
+            my $pin = $self->zilla->chrome->prompt_str('Enter the PIN: ');
             chomp $pin;
             # Fetches tokens and sets them in the Net::Twitter object
             my @access_tokens = $nt->request_access_token(verifier => $pin);
