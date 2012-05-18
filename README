@@ -2,7 +2,7 @@ NAME
     Dist::Zilla::Plugin::Twitter - Twitter when you release with Dist::Zilla
 
 VERSION
-    version 0.015
+    version 0.016
 
 SYNOPSIS
     In your dist.ini:
@@ -46,8 +46,6 @@ DESCRIPTION
 
         [Twitter]
         hash_tags = #perl #cpan #foo
-
-    after_release
 
 AVAILABILITY
     The latest version of this module is available from the Comprehensive

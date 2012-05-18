@@ -1,6 +1,8 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+
+0.016     2012-05-18
     - Don't treat the PIN as a password [GH #1]
 
 0.015     2012-04-01 22:40:05 America/Toronto
