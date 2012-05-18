@@ -23,6 +23,10 @@ In your F<dist.ini>:
     hash_tags = #foo
     url_shortener = TinyURL
 
+=for test_synopsis
+1;
+__END__
+
 =head1 DESCRIPTION
 
 This plugin will use L<Net::Twitter> to send a release notice to Twitter.
@@ -167,9 +171,7 @@ has 'twitter' => (
 
 
 # methods
-=for Pod::Coverage
-
-after_release
+=for Pod::Coverage after_release
 
 =cut
 
