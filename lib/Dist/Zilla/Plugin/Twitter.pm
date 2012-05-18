@@ -1,8 +1,8 @@
+package Dist::Zilla::Plugin::Twitter;
 use 5.008;
 use strict;
 use warnings;
 use utf8;
-package Dist::Zilla::Plugin::Twitter;
 # ABSTRACT: Twitter when you release with Dist::Zilla
 # VERSION
 
@@ -14,6 +14,53 @@ use WWW::Shorten 3.02 ();     # For latest updates to dead services
 use WWW::Shorten::TinyURL (); # Our fallback
 use namespace::autoclean 0.09;
 use Try::Tiny;
+
+=head1 SYNOPSIS
+
+In your F<dist.ini>:
+
+    [Twitter]
+    hash_tags = #foo
+    url_shortener = TinyURL
+
+=head1 DESCRIPTION
+
+This plugin will use L<Net::Twitter> to send a release notice to Twitter.
+By default, it will include a link to release on L<http://metacpan.org>.
+
+The default configuration is as follows:
+
+    [Twitter]
+    tweet_url = https://metacpan.org/release/{{$AUTHOR_UC}}/{{$DIST}}-{{$VERSION}}/
+    tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}}
+    url_shortener = TinyURL
+
+The C<tweet_url> is shortened with L<WWW::Shorten::TinyURL> or
+whichever other service you choose and
+appended to the C<tweet> message.  The following variables are
+available for substitution in the URL and message templates:
+
+      DIST        # Foo-Bar
+      MODULE      # Foo::Bar
+      ABSTRACT    # Foo-Bar is a module that FooBars
+      VERSION     # 1.23
+      TRIAL       # -TRIAL if is_trial, empty string otherwise.
+      TARBALL     # Foo-Bar-1.23.tar.gz
+      AUTHOR_UC   # JOHNDOE
+      AUTHOR_LC   # johndoe
+      AUTHOR_PATH # J/JO/JOHNDOE
+      URL         # http://tinyurl.com/...
+
+You must be using the C<UploadToCPAN> or C<FakeRelease> plugin for this plugin to
+determine your CPAN author ID.
+
+You can use the C<hash_tags> option to append hash tags (or anything,
+really) to the end of the message generated from C<tweet>.
+
+    [Twitter]
+    hash_tags = #perl #cpan #foo
+
+=cut
 
 # extends, roles, attributes, etc.
 with 'Dist::Zilla::Role::AfterRelease';
@@ -93,7 +140,7 @@ has 'twitter' => (
             my $auth_url = $nt->get_authorization_url;
             $self->log(__PACKAGE__ . " isn't authorized to tweet on your behalf yet");
             $self->log("Go to $auth_url to authorize this application");
-            my $pin = $self->zilla->chrome->prompt_str('Enter the PIN: ', { noecho => 1 });
+            my $pin = $self->zilla->chrome->prompt_str('Enter the PIN: ');
             chomp $pin;
             # Fetches tokens and sets them in the Net::Twitter object
             my @access_tokens = $nt->request_access_token(verifier => $pin);
@@ -120,6 +167,11 @@ has 'twitter' => (
 
 
 # methods
+=for Pod::Coverage
+
+after_release
+
+=cut
 
 sub after_release {
     my $self = shift;
@@ -180,59 +232,3 @@ sub after_release {
 __PACKAGE__->meta->make_immutable;
 
 1;
-
-__END__
-
-=for Pod::Coverage
-  after_release
-
-=begin wikidoc
-
-= SYNOPSIS
-
-In your {dist.ini}:
-
-  [Twitter]
-  hash_tags = #foo
-  url_shortener = TinyURL
-
-= DESCRIPTION
-
-This plugin will use [Net::Twitter] to send a release notice to Twitter.
-By default, it will include a link to release on [http://metacpan.org].
-
-The default configuration is as follows:
-
-  [Twitter]
-  tweet_url = https://metacpan.org/release/{{$AUTHOR_UC}}/{{$DIST}}-{{$VERSION}}/
-  tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}}
-  url_shortener = TinyURL
-
-The {tweet_url} is shortened with [WWW::Shorten::TinyURL] or
-whichever other service you choose and
-appended to the {tweet} message.  The following variables are
-available for substitution in the URL and message templates:
-
-      DIST        # Foo-Bar
-      MODULE      # Foo::Bar
-      ABSTRACT    # Foo-Bar is a module that FooBars
-      VERSION     # 1.23
-      TRIAL       # -TRIAL if is_trial, empty string otherwise.
-      TARBALL     # Foo-Bar-1.23.tar.gz
-      AUTHOR_UC   # JOHNDOE
-      AUTHOR_LC   # johndoe
-      AUTHOR_PATH # J/JO/JOHNDOE
-      URL         # http://tinyurl.com/...
-
-You must be using the {UploadToCPAN} or {FakeRelease} plugin for this plugin to
-determine your CPAN author ID.
-
-You can use the {hash_tags} option to append hash tags (or anything,
-really) to the end of the message generated from {tweet}.
-
-  [Twitter]
-  hash_tags = #perl #cpan #foo
-
-=end wikidoc
-
-=cut
