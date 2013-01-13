@@ -97,15 +97,27 @@ has 'hash_tags' => (
 has 'config_file' => (
     is => 'ro',
     isa => 'Str',
+    lazy => 1,
     default => sub {
+        my $self = shift;
         require File::Spec;
         require Dist::Zilla::Util;
 
         return File::Spec->catfile(
-            Dist::Zilla::Util->_global_config_root(),
+            $self->config_dir,
             'twitter.ini'
         );
     }
+);
+
+has 'config_dir' => (
+    is => 'ro',
+    isa => 'Str',
+    lazy => 1,
+    default => sub {
+        require Dist::Zilla::Util;
+        return Dist::Zilla::Util->_global_config_root();
+    },
 );
 
 has 'consumer_tokens' => (
@@ -149,6 +161,11 @@ has 'twitter' => (
             chomp $pin;
             # Fetches tokens and sets them in the Net::Twitter object
             my @access_tokens = $nt->request_access_token(verifier => $pin);
+
+            unless ( -d $self->config_dir ) {
+                require File::Path;
+                File::Path::make_path( $self->config_dir );
+            }
 
             require Config::INI::Writer;
             Config::INI::Writer->write_file( {
