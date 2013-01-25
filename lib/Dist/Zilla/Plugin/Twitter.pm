@@ -56,6 +56,17 @@ substitution in the URL and message templates:
       AUTHOR_PATH # J/JO/JOHNDOE
       URL         # http://tinyurl.com/...
 
+Resources information available in the META.* files of the
+distribution can be accessed via C<<META{key}{subkey}>>, 
+and those values can also be shortener by prefixing 'resources' with a '!'.
+So, for example, to use the GitHub home of the project instead of its metacpan
+page, one can do:
+
+    [Twitter]
+    tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} !META{resource}{repository}{web}
+    url_shortener = TinyURL
+
+
 You must be using the C<UploadToCPAN> or C<FakeRelease> plugin for this plugin to
 determine your CPAN author ID.
 
@@ -208,19 +219,18 @@ sub after_release {
     $stash->{MODULE} = $module;
 
     my $longurl = $self->fill_in_string($self->tweet_url, $stash);
-    if ( $self->url_shortener and $self->url_shortener !~ m/^(?:none|twitter|t\.co)$/ ) {
-      foreach my $service (($self->url_shortener, 'TinyURL')) { # Fallback to TinyURL on errors
-        my $shortener = WWW::Shorten::Simple->new($service);
-        $self->log("Trying $service");
-        $stash->{URL} = eval { $shortener->shorten($longurl) } and last;
-      }
-    }
-    else {
-      $self->log('dist.ini specifies to not use a URL shortener; using full URL');
-      $stash->{URL} = $longurl;
-    }
+    $stash->{URL} = $self->shorten( $longurl );
 
     my $msg = $self->fill_in_string( $self->tweet, $stash);
+
+    $DB::single = 1;
+
+    $msg =~ s/(\!?)META((?:\{[^}]+\})+)/ 
+        ( $1 ? '$self->shorten(' : '' ) 
+      . '$self->zilla->distmeta->'.$2 
+      . ( $1 ? ')' : '' )
+     /xeeg;
+
     if (defined $self->hash_tags) {
         $msg .= " " . $self->hash_tags;
     }
@@ -236,6 +246,26 @@ sub after_release {
     };
 
     return 1;
+}
+
+
+sub shorten {
+    my( $self, $url ) = @_;
+
+    unless ( $self->url_shortener and $self->url_shortener !~ m/^(?:none|twitter|t\.co)$/ ) {
+      $self->log('dist.ini specifies to not use a URL shortener; using full URL');
+      return $url;
+    }
+
+    foreach my $service (($self->url_shortener, 'TinyURL')) { # Fallback to TinyURL on errors
+        my $shortener = WWW::Shorten::Simple->new($service);
+        $self->log("Trying $service");
+        if ( my $short = eval { $shortener->shorten($url) } ) {
+            return $short;
+        }
+    }
+
+    return $url;
 }
 
 __PACKAGE__->meta->make_immutable;
