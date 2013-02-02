@@ -252,7 +252,7 @@ sub after_release {
     if (defined $self->hash_tags) {
         $msg .= " " . $self->hash_tags;
     }
-
+    $msg =~ tr/ //s; # squeeze multiple consecutive spaces into just one
 
     try {
         $self->twitter->update($msg);
