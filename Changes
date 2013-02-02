@@ -1,6 +1,8 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+
+0.018     2013-02-02
     - Allow adding any information from META [Yanick Champoux] and
       add a link to the repo's web URL by default
 
