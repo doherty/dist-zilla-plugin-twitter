@@ -85,7 +85,7 @@ with 'Dist::Zilla::Role::TextTemplate';
 has 'tweet' => (
   is  => 'ro',
   isa => 'Str',
-  default => 'Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}} !META{resource}{repository}{web}'
+  default => 'Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}} !META{resources}{repository}{web}'
 );
 
 has 'tweet_url' => (
@@ -243,11 +243,14 @@ sub after_release {
 
     $DB::single = 1;
 
-    $msg =~ s/(\!?)META((?:\{[^}]+\})+)/
-        ( $1 ? '$self->_shorten(' : '' )
-      . '$self->zilla->distmeta->'.$2
-      . ( $1 ? ')' : '' )
-     /xeeg;
+    {
+        no warnings qw/ uninitialized /;
+        $msg =~ s/(\!?)META((?:\{[^}]+\})+)/
+            ( $1 ? '$self->_shorten(' : '' )
+          . '$self->zilla->distmeta->'.$2
+          . ( $1 ? ')' : '' )
+         /xeeg;
+     }
 
     if (defined $self->hash_tags) {
         $msg .= " " . $self->hash_tags;

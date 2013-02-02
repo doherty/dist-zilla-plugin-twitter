@@ -1,6 +1,7 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+    - Fix a typo in the default tweet spec
 
 0.018     2013-02-02
     - Allow adding any information from META [Yanick Champoux] and
