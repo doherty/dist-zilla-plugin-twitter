@@ -85,7 +85,7 @@ with 'Dist::Zilla::Role::TextTemplate';
 has 'tweet' => (
   is  => 'ro',
   isa => 'Str',
-  default => 'Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}}'
+  default => 'Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}} !META{resource}{repository}{web}'
 );
 
 has 'tweet_url' => (
