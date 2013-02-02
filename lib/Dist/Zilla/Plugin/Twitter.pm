@@ -127,7 +127,8 @@ has 'config_dir' => (
     lazy => 1,
     default => sub {
         require Dist::Zilla::Util;
-        return Dist::Zilla::Util->_global_config_root();
+        my $dir = Dist::Zilla::Util->_global_config_root();
+        return $dir->stringify;
     },
 );
 
