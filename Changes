@@ -1,6 +1,7 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+    - API v1.1 support [GH #5]
 
 0.020     2013-02-02
     - Link to doherty's github repo instead of dagolden's
