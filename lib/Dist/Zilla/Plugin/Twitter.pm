@@ -36,14 +36,18 @@ The default configuration is as follows:
 
     [Twitter]
     tweet_url = https://metacpan.org/release/{{$AUTHOR_UC}}/{{$DIST}}-{{$VERSION}}/
-    tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}}
+    tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} {{$URL}} !META{resources}{repository}{web}
     url_shortener = TinyURL
 
 The C<tweet_url> is shortened with L<WWW::Shorten::TinyURL> or
 whichever other service you choose (use 'none' to use the full URL,
 in which case Twitter will shorten it for you) and appended to the
-C<tweet> message.  The following variables are available for
-substitution in the URL and message templates:
+C<tweet> message.
+
+=head2 VARIABLE INTERPOLATION
+
+The following variables are available for substitution in the URL
+and message templates:
 
       DIST        # Foo-Bar
       MODULE      # Foo::Bar
@@ -56,9 +60,35 @@ substitution in the URL and message templates:
       AUTHOR_PATH # J/JO/JOHNDOE
       URL         # http://tinyurl.com/...
 
-Resources information available in the META.* files of the
-distribution can be accessed via C<<META{key}{subkey}>>,
-and those values can also be shortener by prefixing 'resources' with a '!'.
+=head3 DISTMETA INTERPOLATION
+
+Resources information available in the META.* files of the distribution
+can be accessed via C<<META{key}{subkey}[1]>>. You may mix-and-match
+C<{...}> to access hashref elements and C<[\d]> to access arrayref elements.
+You're responsible for making sure you are accessing the right part of
+the META data structure, and treating it as the right type of data. See
+L<CPAN::Meta::Spec> and the "$TYPE DATA" sections of L<CPAN::Meta> in
+particular.
+
+The C<< META{...} >> replacement may also have one of two modifiers, which
+are prefixed directly before C<META>:
+
+=over 4
+
+=item C<!> - URL shortening
+
+Providing an exclamation point (C<< !META{...} >>) will URL-shorten the value
+you extract from the distmeta data structure. This will have no effect unless
+the value is a URL to begin with.
+
+=item C<@> - Arrayref stringification
+
+Providing an at-symbol (C<< @META{...} >>) will include all the elements of
+the arrayref you specify by joining them with C<$">. So, this is just like
+doing C<< "@{ $your_array_ref }" >>.
+
+=back
+
 So, for example, to use the GitHub home of the project instead of its metacpan
 page, one can do:
 
@@ -66,9 +96,17 @@ page, one can do:
     tweet = Released {{$DIST}}-{{$VERSION}}{{$TRIAL}} !META{resource}{repository}{web}
     url_shortener = TinyURL
 
+Or, to include the authors in your tweet:
+
+    [Twitter]
+    tweet = @META{author} released {{$MODULE}} {{$VERSION}}: {{$URL}}
+
+=head2 PAUSEID
 
 You must be using the C<UploadToCPAN> or C<FakeRelease> plugin for this plugin to
-determine your CPAN author ID.
+determine your PAUSEID.
+
+=head2 HASHTAGS
 
 You can use the C<hash_tags> option to append hash tags (or anything,
 really) to the end of the message generated from C<tweet>.
@@ -245,12 +283,25 @@ sub after_release {
 
     {
         no warnings qw/ uninitialized /;
-        $msg =~ s/(\!?)META((?:\{[^}]+\})+)/
-            ( $1 ? '$self->_shorten(' : '' )
-          . '$self->zilla->distmeta->'.$2
-          . ( $1 ? ')' : '' )
-         /xeeg;
-     }
+        $msg =~ s/
+        (?<modifier>[!@]?)
+        META
+        (?<access>
+          (?:
+            \{ [^}]+  \}
+            |
+            \[ [0-9]+ \]
+          )
+        +)
+        /
+            ( $+{modifier} eq '!' ? '$self->_shorten('  : '' )
+          . ( $+{modifier} eq '@' ? 'join($", @{'       : '' )
+          . '$self->zilla->distmeta->' . $+{access}
+          . ( $+{modifier} eq '@' ? '})'                : '' )
+          . ( $+{modifier} eq '!' ? ')'                 : '' )
+        /xeeg;
+        warn $@ if $@;
+    }
 
     if (defined $self->hash_tags) {
         $msg .= " " . $self->hash_tags;
