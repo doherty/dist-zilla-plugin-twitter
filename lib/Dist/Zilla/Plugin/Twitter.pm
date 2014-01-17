@@ -191,6 +191,7 @@ has 'twitter' => (
         my $nt = Net::Twitter->new(
             useragent_class => $ENV{DZ_TWITTER_USERAGENT} || 'LWP::UserAgent',
             traits => [qw/ API::RESTv1_1 OAuth /],
+            ssl => 1,
             %{ $self->consumer_tokens },
         );
 
@@ -332,7 +333,7 @@ sub _shorten {
     foreach my $service (($self->url_shortener, 'TinyURL')) { # Fallback to TinyURL on errors
         my $shortener = WWW::Shorten::Simple->new($service);
         $self->log("Trying $service");
-        if ( my $short = eval { $shortener->_shorten($url) } ) {
+        if ( my $short = eval { $shortener->shorten($url) } ) {
             return $short;
         }
     }

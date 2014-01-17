@@ -1,6 +1,7 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+  - Twitter API is now SSL-only, so use SSL to connect to Twitter
 
 0.024     2013-11-27
   - Add "=head1 NAME" so the pod will get munged during test
