@@ -1,6 +1,8 @@
 Revision history for Dist-Zilla-Plugin-Twitter
 
 {{$NEXT}}
+
+0.026     2014-10-02
   - Fixed the test suite for compatibility with WWW::Shorten v0.1.1,
     which removed Metamark support [gh-8]
 
